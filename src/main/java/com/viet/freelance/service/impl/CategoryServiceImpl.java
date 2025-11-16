@@ -8,7 +8,9 @@ import com.viet.freelance.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,22 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(newCategory);
         return convertToResponse(newCategory);
     }
+
+    @Override
+    public List<CategoryResponse> read() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(categoryEntity -> convertToResponse(categoryEntity))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void delete(String categoryId) {
+        CategoryEntity existingCategory = categoryRepository.findByCategoryId(categoryId)
+                        .orElseThrow(()-> new RuntimeException("Category not found" + categoryId));
+        categoryRepository.delete(existingCategory);
+    }
+
     private CategoryEntity convertToCategory(CategoryRequest request){
         return CategoryEntity.builder()
                 .categoryId(UUID.randomUUID().toString())
